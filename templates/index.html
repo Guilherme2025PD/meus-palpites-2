@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Analista de Apostas</title>
+    <style>
+        :root {
+            --primary: #00ff88;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 2px solid var(--card);
+        }
+
+        h1 { color: var(--primary); margin: 0; font-size: 2.5rem; }
+        p.subtitle { color: #94a3b8; margin-top: 10px; }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 5px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover { transform: translateY(-5px); }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+
+        .confianca-Alta { background: #059669; color: white; }
+        .confianca-Média-Alta { background: #d97706; color: white; }
+        .confianca-Média { background: #4b5563; color: white; }
+
+        .confronto { font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; }
+        .sugestao { color: var(--primary); font-size: 1.1rem; margin-bottom: 15px; }
+        .motivo { font-size: 0.9rem; color: #94a3b8; border-top: 1px solid #334155; padding-top: 10px; }
+
+        #loading { text-align: center; font-size: 1.2rem; color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Sports AI Predictor</h1>
+    <p class="subtitle">Análises baseadas em pressão ofensiva e estatísticas em tempo real</p>
+</header>
+
+<div id="loading">Carregando análises da IA...</div>
+<div class="container" id="grid-apostas"></div>
+
+<script>
+    // Função para carregar os dados do arquivo JSON gerado pelo Python
+    async function carregarDados() {
+        try {
+            const response = await fetch('dados_apostas.json');
+            const dados = await response.json();
+            const grid = document.getElementById('grid-apostas');
+            const loading = document.getElementById('loading');
+
+            loading.style.display = 'none';
+
+            dados.forEach(jogo => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                const confClass = jogo["Nível de Confiança"] || jogo["Confiança"];
+                
+                card.innerHTML = `
+                    <div class="badge confianca-${confClass.replace(' ', '-')}">${confClass} Confiança</div>
+                    <div class="confronto">${jogo.Confronto || jogo.Jogo}</div>
+                    <div class="sugestao">🎯 Sugestão: ${jogo.Sugestão || jogo["Palpite Sugerido"]}</div>
+                    <div class="motivo"><strong>Justificativa:</strong> ${jogo.Motivo || jogo.Justificativa}</div>
+                `;
+                grid.appendChild(card);
+            });
+        } catch (error) {
+            document.getElementById('loading').innerHTML = "Erro ao carregar dados. Certifique-se de que o script Python gerou o arquivo 'dados_apostas.json'.";
+            console.error(error);
+        }
+    }
+
+    carregarDados();
+</script>
+
+</body>
+</html>
